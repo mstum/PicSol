@@ -1,5 +1,6 @@
 using System;
-using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace PicSol.Tests
@@ -63,13 +64,30 @@ namespace PicSol.Tests
         [Fact]
         public void PermutationsHitTimeout()
         {
-            var sw = new Stopwatch();
-            sw.Restart();
             var solution = Solver.Solve(ExampleNonograms.SlowUnsolvable, TimeSpan.FromSeconds(1));
-            sw.Stop();
-            Assert.True(sw.Elapsed < TimeSpan.FromSeconds(3)); // The timeout may not be exactly hit, as the current loop still finishes
             Assert.Equal(SolveResult.Cancelled, solution.Result);
-            Assert.True(solution.TimeTaken < TimeSpan.FromSeconds(3));
+        }
+
+        [Fact]
+        public void ExternalCancellationToken()
+        {
+            var delay = TimeSpan.FromMilliseconds(250);
+
+            using (var cts = new CancellationTokenSource())
+            {
+                var solTask = Task.Run<Solution>(() => Solver.Solve(ExampleNonograms.SlowUnsolvable, timeout: null, cancellationTokenSource: cts, useMultipleCores: true));
+                cts.CancelAfter(delay);
+                var solution = solTask.Result;
+                Assert.Equal(SolveResult.Cancelled, solution.Result);
+            }
+
+            using (var cts = new CancellationTokenSource())
+            {
+                var solTask = Task.Run<Solution>(() => Solver.Solve(ExampleNonograms.SlowUnsolvable, timeout: null, cancellationTokenSource: cts, useMultipleCores: false));
+                cts.CancelAfter(delay);
+                var solution = solTask.Result;
+                Assert.Equal(SolveResult.Cancelled, solution.Result);
+            }
         }
     }
 }
