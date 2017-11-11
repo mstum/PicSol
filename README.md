@@ -15,29 +15,18 @@ By default, the Solver tries to use all CPU Cores and pararellize work. If you d
 
 ## Defining a Nonogram
 The `Nonogram` class has a constructor that takes the Name, the number of rows an columns, and the hints for rows and columns.
+Hints are the numbers displayed on the side of the grid.   
+You can either create a `HintCollection`, or pass in a string.   
 
-Hints are the numbers displayed on the side of the grid.
+If you pass a string, separate individual elements with a space, and hints for the same element with a comma.   
+For columns, numbers are from top to bottom.   
+For rows, numbers are from left to right.   
 
-You can either create a `HintCollection`, or pass in a string.
-
-
-
-If you pass a string, separate individual elements with a space, and hints for the same element with a comma.
-
-For columns, numbers are from top to bottom.
-
-For rows, numbers are from left to right.
-
-
-For example, `"3 1,1 3 4,1,2"` describes 4 elements (rows or columns).
-
-The first element has `3` contigous cells filled.
-
-The second element has two groups with `1` filled cell each, with at least one empty cell between them.
-
-The third element has `3` contigous cells filled.
-
-The fourth element has a group of `4` filled cells, then at least one empty cell, and then a second group of `1` filled cell, at least one empty cell, and a group of `2` filled cells.
+For example, `"3 1,1 3 4,1,2"` describes 4 elements (rows or columns).   
+The first element has `3` contigous cells filled.   
+The second element has two groups with `1` filled cell each, with at least one empty cell between them.   
+The third element has `3` contigous cells filled.   
+The fourth element has a group of `4` filled cells, then at least one empty cell, and then a second group of `1` filled cell, at least one empty cell, and a group of `2` filled cells.   
 
 For example, some definitions and their (unsolved) Nonograms:
 ```cs
@@ -72,8 +61,9 @@ new Nonogram("Unsolvable", 2, 2, "2 1", "1 1");
 
  // This uses 2D arrays as hints, and is the same as the Four Rows, Five Columns example above.
 var rowHints = new int[4][] { new int[] { 2 }, new int[] { 1, 1 }, new int[] { 4 }, new int[] { 1 } };
-var colHints = new int[5][] { new int[] { 2 }, new int[] { 1, 1 }, 
-                              new int[] { 1, 2 }, new int[] { 2 }, new int[] { 0 } };
+var colHints = new int[5][] { 
+         new int[] { 2 }, new int[] { 1, 1 },  new int[] { 1, 2 }, new int[] { 2 }, new int[] { 0 }
+};
 new Nonogram("Four Rows, Five Columns", 4, 5, HintCollection.From2DArray(rowHints),
                                               HintCollection.From2DArray(colHints));
 
@@ -114,11 +104,13 @@ for (int row = 0; row < solution.RowCount; row++)
 ```
 
 # Examples
-For a more detailed example, check out the `PicSol.Console` and `PicSol.Tests` projects, which contain [`ExampleNonograms`](https://github.com/mstum/PicSol/blob/master/PicSol/PicSol.Tests/ExampleNonograms.cs) and a [Solution-to-string renderer](https://github.com/mstum/PicSol/blob/master/PicSol/PicSol.Console/SolutionRenderer.cs).
+For a more detailed example, check out the `PicSol.Console` and `PicSol.Tests` projects, which contain [ExampleNonograms](https://github.com/mstum/PicSol/blob/master/PicSol/PicSol.Tests/ExampleNonograms.cs) and a [Solution-to-string renderer](https://github.com/mstum/PicSol/blob/master/PicSol/PicSol.Console/SolutionRenderer.cs).
 
 # Caveats / Known Issues
 The solver is using a rather brute force method, creating a lot of data (e.g., the `SlowUnsolvable` example creates ~4.6 Million possibilities, and uses about 500 MB of memory).
+
 However, even larger Nonograms should be solvable in a sane amount of time, however, it's recommended that you pass either a Timeout or your own CancellationTokenSource, to prevent the process from going for too long.
+
 There are some optimizations to reduce the required memory and CPU, but Nonograms are NP-Complete, and as such there is no guaranteed way to limit how much time or memory is needed to solve it.
 
 That said, more optimizations are always possible.
