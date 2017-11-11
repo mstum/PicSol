@@ -17,7 +17,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/mstum/PicSol</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mstum/PicSol.git</RepositoryUrl>
-    <PackageIconUrl>http://mstum.github.com/PicSol/package.png</PackageIconUrl>
+    <PackageIconUrl>https://github.com/mstum/PicSol/raw/master/package.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags></PackageTags>
     <PackageId>PicSol</PackageId>
