@@ -137,7 +137,7 @@ namespace PicSol
             var falseCount = lengthPerPermutation - hintSum + 1; // The + 1 is intentional, because of the way the Enumerator works.
             foreach (var bas in ExpensivePermutationEnumerator.CreateEnumerable(hintData, 0, lengthPerPermutation, falseCount))
             {
-                actionWithPermutation(bas);
+                actionWithPermutation(bas.Permutation);
             }
         }
 
