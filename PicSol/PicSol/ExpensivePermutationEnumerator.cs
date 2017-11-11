@@ -45,7 +45,7 @@ namespace PicSol
         {
             internal static IEnumerable<ExpensivePermutationState> CreateEnumerable(int[] hintData, int currentIx, int lengthPerPermutation, int falseCount)
             {
-                var result = new ExpensivePermutationEnumeratorInner(State.MinusTwo, hintData, currentIx, lengthPerPermutation, falseCount);
+                var result = new ExpensivePermutationEnumeratorInner(State.Initial, hintData, currentIx, lengthPerPermutation, falseCount);
                 return result;
             }
             // TODO: Refactor this, as it's mostly a copy/pasted Compiler-generated Enumerator
@@ -91,22 +91,22 @@ namespace PicSol
                 {
                     switch (_state)
                     {
-                        case State.Zero:
-                            _state = State.MinusOne;
+                        case State.StartNewEnumeration:
+                            _state = State.Finished;
                             _hdl = _hintData.Length - _currentIx;
                             if (_hdl == 0)
                             {
                                 _current = new ExpensivePermutationState(new BitArray(_lengthPerPermutation, false), _lengthPerPermutation - _falseCount);
-                                _state = State.One;
+                                _state = State.CreatedEmptyBitArray;
                                 return true;
                             }
                             _x = 1;
                             goto label_11; // This is copy/pasted from a compiler-generated Enumerator and hasn't been refactored yet.
-                        case State.One:
-                            _state = State.MinusOne;
+                        case State.CreatedEmptyBitArray:
+                            _state = State.Finished;
                             return false;
-                        case State.Two:
-                            _state = State.MinusThree;
+                        case State.DoAnotherIteration:
+                            _state = State.ReinitializedInnerEnumerator;
                             _bac = new ExpensivePermutationState();
                             break;
                         default:
@@ -121,7 +121,7 @@ namespace PicSol
                         PermutationGenerator.SetBits(_bac.Permutation, _count, _hintData[_currentIx], true);
                         _count = _count - _x;
                         _current = new ExpensivePermutationState(_bac.Permutation, _count);
-                        _state = State.Two;
+                        _state = State.DoAnotherIteration;
                         return true;
                     }
                     Finally();
@@ -134,7 +134,7 @@ namespace PicSol
                         return false;
                     }
                     _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _x).GetEnumerator();
-                    _state = State.MinusThree;
+                    _state = State.ReinitializedInnerEnumerator;
                     goto label_9;
                 }
                 catch
@@ -149,14 +149,14 @@ namespace PicSol
             IEnumerator<ExpensivePermutationState> IEnumerable<ExpensivePermutationState>.GetEnumerator()
             {
                 ExpensivePermutationEnumeratorInner result;
-                if (_state == State.MinusTwo && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
+                if (_state == State.Initial && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
                 {
-                    _state = State.Zero;
+                    _state = State.StartNewEnumeration;
                     result = this;
                 }
                 else
                 {
-                    result = new ExpensivePermutationEnumeratorInner(State.Zero, _hintData, _currentIx, _lengthPerPermutation, _falseCount);
+                    result = new ExpensivePermutationEnumeratorInner(State.StartNewEnumeration, _hintData, _currentIx, _lengthPerPermutation, _falseCount);
                 }
 
                 return result;
@@ -170,34 +170,38 @@ namespace PicSol
 
             private void Finally()
             {
-                _state = State.MinusOne;
+                _state = State.Finished;
                 _innerEnumerator?.Dispose();
             }
 
             void IDisposable.Dispose()
             {
-                switch (_state)
+                if (_state == State.ReinitializedInnerEnumerator || _state == State.DoAnotherIteration)
                 {
-                    case State.MinusThree:
-                    case State.Two:
-                        try { }
-                        finally
-                        {
-                            Finally();
-                        }
-                        break;
+                    try { }
+                    finally
+                    {
+                        Finally();
+                    }
                 }
             }
 
             public enum State
             {
-                // TODO: Name these States properly.
-                Zero = 0,
-                One = 1,
-                Two = 2,
-                MinusThree = -3,
-                MinusTwo = -2,
-                MinusOne = -1
+                ReinitializedInnerEnumerator = -3,
+
+                Initial = -2,
+
+                /// <summary>
+                /// May be set temporarily
+                /// </summary>
+                Finished = -1,
+
+                StartNewEnumeration = 0,
+
+                CreatedEmptyBitArray = 1,
+
+                DoAnotherIteration = 2,
             }
         }
     }
