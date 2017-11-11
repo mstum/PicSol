@@ -90,7 +90,6 @@ namespace PicSol
                     switch (_state)
                     {
                         case State.StartNewEnumeration:
-                            _state = State.Finished;
                             _hdl = _hintData.Length - _currentIx;
                             if (_hdl == 0)
                             {
@@ -102,16 +101,12 @@ namespace PicSol
                             ReinitializeInnerEnumerator();
                             return InnerEnumeratorLoop();
                         case State.CreatedEmptyBitArray:
-                            _state = State.Finished;
                             return false;
                         case State.InnerEnumeratorAdvancedSuccessfully:
-                            _state = State.ReinitializedInnerEnumerator;
-                            break;
+                            return InnerEnumeratorLoop();
                         default:
                             return false;
                     }
-
-                    return InnerEnumeratorLoop();
                 }
                 catch
                 {
@@ -142,7 +137,7 @@ namespace PicSol
                     return false;
                 }
                 _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _x).GetEnumerator();
-                _state = State.ReinitializedInnerEnumerator;
+                _state = State.InnerEnumeratorAdvancedSuccessfully;
                 return true;
             }
 
@@ -191,13 +186,12 @@ namespace PicSol
 
             private void Finally()
             {
-                _state = State.Finished;
                 _innerEnumerator?.Dispose();
             }
 
             void IDisposable.Dispose()
             {
-                if (_state == State.ReinitializedInnerEnumerator || _state == State.InnerEnumeratorAdvancedSuccessfully)
+                if (_state == State.InnerEnumeratorAdvancedSuccessfully)
                 {
                     try { }
                     finally
@@ -209,14 +203,7 @@ namespace PicSol
 
             public enum State
             {
-                ReinitializedInnerEnumerator = -3,
-
                 Initial = -2,
-
-                /// <summary>
-                /// May be set temporarily
-                /// </summary>
-                Finished = -1,
 
                 StartNewEnumeration = 0,
 
