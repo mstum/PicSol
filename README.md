@@ -1,4 +1,4 @@
-# PicSol
+# ![Picsol](https://github.com/mstum/PicSol/raw/master/package.png) PicSol
 This is a [Nonogram](https://en.wikipedia.org/wiki/Nonogram) solver library for .net Standard 2.0/.net Framework 4.  
 Nonograms are also known as "Picture Crosswords", "Picross", or "Griddlers".
 
