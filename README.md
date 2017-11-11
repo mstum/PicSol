@@ -87,8 +87,8 @@ Possible Results:
 * Cancelled - The solver either did take too long to solve the Nonogram (and hit the timeout), or you called Cancel on the CancellationTokenSource that you passed in.
 Note that a status of Cancelled doesn't tell you whether the Nonogram was valid or not.
 
-The `Tiles` contain the actual cells, a 2-Dimensional collection of bools where `true` means the cell is filled.
-Note that even if `IsSolved` is false, Tiles may contain data (in this case, the last internal state of the solver before it gave up).
+The `Tiles` contain the actual cells, a 2-Dimensional collection of bools where `true` means the cell is filled.   
+Note that even if `IsSolved` is false, Tiles may contain data (in this case, the last internal state of the solver before it gave up).   
 This can be useful to troubleshoot why a Nonogram couldn't be solved.
 
 You can iterate over the rows and columns:
