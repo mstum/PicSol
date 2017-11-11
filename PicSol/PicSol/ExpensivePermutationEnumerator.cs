@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 namespace PicSol
@@ -81,40 +80,42 @@ namespace PicSol
                 _innerEnumerator = default(IEnumerator<ExpensivePermutationState>);
             }
 
-            ExpensivePermutationState IEnumerator<ExpensivePermutationState>.Current => _current;
-            object IEnumerator.Current => _current;
-
             public bool MoveNext()
             {
                 try
                 {
-                    switch (_state)
+                    if (_state == State.CreatedEmptyBitArray)
                     {
-                        case State.StartNewEnumeration:
-                            _hdl = _hintData.Length - _currentIx;
-                            if (_hdl == 0)
-                            {
-                                _current = new ExpensivePermutationState(new BitArray(_lengthPerPermutation, false), _lengthPerPermutation - _falseCount);
-                                _state = State.CreatedEmptyBitArray;
-                                return true;
-                            }
-                            _rightFreeSpace = 1;
-                            ReinitializeInnerEnumerator();
-                            return InnerEnumeratorLoop();
-                        case State.CreatedEmptyBitArray:
-                            // This terminates an Inner Enumerator, it won't be reached on the outermost enumerator
-                            return false;
-                        case State.InnerEnumeratorAdvancedSuccessfully:
-                            return InnerEnumeratorLoop();
-                        default:
-                            return false;
+                        // This terminates an Inner Enumerator, it won't be reached on the outermost enumerator
+                        return false;
+                    }
+                    else if (_state == State.InnerEnumeratorAdvancedSuccessfully)
+                    {
+                        return InnerEnumeratorLoop();
+                    }
+                    else if (_state == State.StartNewEnumeration)
+                    {
+                        _hdl = _hintData.Length - _currentIx;
+                        if (_hdl == 0)
+                        {
+                            _current = new ExpensivePermutationState(new BitArray(_lengthPerPermutation, false), _lengthPerPermutation - _falseCount);
+                            _state = State.CreatedEmptyBitArray;
+                            return true; // Must return true so that the caller actually fetches the _current BitArray
+                        }
+                        _rightFreeSpace = 1;
+                        ReinitializeInnerEnumerator();
+                        return InnerEnumeratorLoop();
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
                 catch
                 {
                     ((IDisposable)this).Dispose();
+                    return false;
                 }
-                return false;
             }
 
             private bool InnerEnumeratorLoop()
@@ -148,60 +149,47 @@ namespace PicSol
                 if (_innerEnumerator.MoveNext())
                 {
                     var bac = _innerEnumerator.Current;
-                    var count = bac.Index - _hintData[_currentIx];
-                    PermutationGenerator.SetBits(bac.Permutation, count, _hintData[_currentIx], true);
+                    var hd = _hintData[_currentIx];
+                    var count = bac.Index - hd;
+                    PermutationGenerator.SetBits(bac.Permutation, count, hd, true);
                     count = count - _rightFreeSpace;
                     _current = new ExpensivePermutationState(bac.Permutation, count);
                     _state = State.InnerEnumeratorAdvancedSuccessfully;
                     return true;
                 }
-                Finally();
+
+                _innerEnumerator.Dispose();
                 _innerEnumerator = null;
                 _rightFreeSpace = _rightFreeSpace + 1;
                 return false;
             }
 
-            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ExpensivePermutationState>)this).GetEnumerator();
-
             IEnumerator<ExpensivePermutationState> IEnumerable<ExpensivePermutationState>.GetEnumerator()
             {
-                ExpensivePermutationEnumeratorInner result;
                 // TODO: Does the Thread ID really matter here?
                 if (_state == State.NotInitialized && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
                 {
                     _state = State.StartNewEnumeration;
-                    result = this;
+                    return this;
                 }
                 else
                 {
-                    result = new ExpensivePermutationEnumeratorInner(State.StartNewEnumeration, _hintData, _currentIx, _lengthPerPermutation, _falseCount);
+                    return new ExpensivePermutationEnumeratorInner(State.StartNewEnumeration, _hintData, _currentIx, _lengthPerPermutation, _falseCount);
                 }
-
-                return result;
-            }
-
-            [DebuggerHidden]
-            void IEnumerator.Reset()
-            {
-                throw new NotSupportedException();
-            }
-
-            private void Finally()
-            {
-                _innerEnumerator?.Dispose();
             }
 
             void IDisposable.Dispose()
             {
                 if (_state == State.InnerEnumeratorAdvancedSuccessfully)
                 {
-                    try { }
-                    finally
-                    {
-                        Finally();
-                    }
+                    _innerEnumerator?.Dispose();
                 }
             }
+
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ExpensivePermutationState>)this).GetEnumerator();
+            ExpensivePermutationState IEnumerator<ExpensivePermutationState>.Current => _current;
+            object IEnumerator.Current => _current;
+            void IEnumerator.Reset() => throw new NotSupportedException();
 
             public enum State
             {
