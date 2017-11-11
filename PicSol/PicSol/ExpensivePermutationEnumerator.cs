@@ -41,11 +41,14 @@ namespace PicSol
             }
         }
 
+        /// <summary>
+        /// This is a recursive Enumerator, that is, it contains an _innerEnumerator which can contain an _innerEnumerator which can contain an _innerEnumerator...
+        /// </summary>
         private struct ExpensivePermutationEnumeratorInner : IEnumerable<ExpensivePermutationState>, IEnumerator<ExpensivePermutationState>
         {
             internal static IEnumerable<ExpensivePermutationState> CreateEnumerable(int[] hintData, int currentIx, int lengthPerPermutation, int falseCount)
             {
-                var result = new ExpensivePermutationEnumeratorInner(State.Initial, hintData, currentIx, lengthPerPermutation, falseCount);
+                var result = new ExpensivePermutationEnumeratorInner(State.NotInitialized, hintData, currentIx, lengthPerPermutation, falseCount);
                 return result;
             }
             // TODO: Refactor this, as it's mostly a copy/pasted Compiler-generated Enumerator
@@ -60,9 +63,8 @@ namespace PicSol
             private int _falseCount;
 
             private int _hdl;
-            private int _x;
+            private int _rightFreeSpace;
             private IEnumerator<ExpensivePermutationState> _innerEnumerator;
-            private int _count;
 
             private ExpensivePermutationEnumeratorInner(State state, int[] hintData, int currentIx, int lengthPerPermutation, int falseCount)
             {
@@ -75,9 +77,8 @@ namespace PicSol
                 _lengthPerPermutation = lengthPerPermutation;
                 _falseCount = falseCount;
                 _hdl = default(int);
-                _x = default(int);
+                _rightFreeSpace = default(int);
                 _innerEnumerator = default(IEnumerator<ExpensivePermutationState>);
-                _count = default(int);
             }
 
             ExpensivePermutationState IEnumerator<ExpensivePermutationState>.Current => _current;
@@ -97,10 +98,11 @@ namespace PicSol
                                 _state = State.CreatedEmptyBitArray;
                                 return true;
                             }
-                            _x = 1;
+                            _rightFreeSpace = 1;
                             ReinitializeInnerEnumerator();
                             return InnerEnumeratorLoop();
                         case State.CreatedEmptyBitArray:
+                            // This terminates an Inner Enumerator, it won't be reached on the outermost enumerator
                             return false;
                         case State.InnerEnumeratorAdvancedSuccessfully:
                             return InnerEnumeratorLoop();
@@ -132,11 +134,11 @@ namespace PicSol
 
             private bool ReinitializeInnerEnumerator()
             {
-                if (_x >= _falseCount - _hdl + 2)
+                if (_rightFreeSpace >= _falseCount - _hdl + 2)
                 {
                     return false;
                 }
-                _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _x).GetEnumerator();
+                _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _rightFreeSpace).GetEnumerator();
                 _state = State.InnerEnumeratorAdvancedSuccessfully;
                 return true;
             }
@@ -146,16 +148,16 @@ namespace PicSol
                 if (_innerEnumerator.MoveNext())
                 {
                     var bac = _innerEnumerator.Current;
-                    _count = bac.Index - _hintData[_currentIx];
-                    PermutationGenerator.SetBits(bac.Permutation, _count, _hintData[_currentIx], true);
-                    _count = _count - _x;
-                    _current = new ExpensivePermutationState(bac.Permutation, _count);
+                    var count = bac.Index - _hintData[_currentIx];
+                    PermutationGenerator.SetBits(bac.Permutation, count, _hintData[_currentIx], true);
+                    count = count - _rightFreeSpace;
+                    _current = new ExpensivePermutationState(bac.Permutation, count);
                     _state = State.InnerEnumeratorAdvancedSuccessfully;
                     return true;
                 }
                 Finally();
                 _innerEnumerator = null;
-                _x = _x + 1;
+                _rightFreeSpace = _rightFreeSpace + 1;
                 return false;
             }
 
@@ -165,7 +167,7 @@ namespace PicSol
             {
                 ExpensivePermutationEnumeratorInner result;
                 // TODO: Does the Thread ID really matter here?
-                if (_state == State.Initial && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
+                if (_state == State.NotInitialized && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
                 {
                     _state = State.StartNewEnumeration;
                     result = this;
@@ -203,13 +205,27 @@ namespace PicSol
 
             public enum State
             {
-                Initial = -2,
+                /// <summary>
+                /// GetEnumerator() hasn't been called yet
+                /// </summary>
+                NotInitialized = 0,
 
-                StartNewEnumeration = 0,
+                /// <summary>
+                /// Ready to start a new round.
+                /// </summary>
+                StartNewEnumeration,
 
-                CreatedEmptyBitArray = 1,
+                /// <summary>
+                /// The innermost _innerEnumerator was reached.
+                /// This enumerator is the one that actually creates each BitArray, and then exits.
+                /// </summary>
+                CreatedEmptyBitArray,
 
-                InnerEnumeratorAdvancedSuccessfully = 2,
+                /// <summary>
+                /// The last time we tried to call _innerEnumerator.MoveNext(), we succeeded.
+                /// So let's try to MoveNext() again.
+                /// </summary>
+                InnerEnumeratorAdvancedSuccessfully,
             }
         }
     }
