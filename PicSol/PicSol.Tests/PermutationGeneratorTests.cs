@@ -147,7 +147,7 @@ namespace PicSol.Tests
             expected3.Set(3, true);
 
             var permutations = new List<BitArray>();
-            PermutationGenerator.CreateSimplePermutations(hintData, length, permutations.Add);
+            PermutationGenerator.CreateSimplePermutations(hintData[0], length, permutations.Add);
 
             Assert.Equal(3, permutations.Count);
             Assert.Contains(expected1, permutations);

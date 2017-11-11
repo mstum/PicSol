@@ -104,7 +104,7 @@ using System.Threading;
  *      [false, false, true, false, false]
  *      
  * Now, we are repeating this process with the collections swapped - we try to remove as many colPermutations as possible.
- * There were some to remove, we're now left with these colPermutations: * 
+ * There were some to remove, we're now left with these colPermutations:
  * [0]: 1 left, 2 gone (Column Hint: 2)
  *      [false, true, true, false]
  * [1]: 1 left, 2 gone (Column Hint: 1 1)

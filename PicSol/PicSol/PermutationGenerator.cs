@@ -4,39 +4,6 @@ using System.Linq;
 
 namespace PicSol
 {
-    /* Algorithm:
-     * Go through every Element of the HintsCollection, which gives us the hints.
-     * There may be only one hint (e.g., [2]) or multiple ones (e.g., [1,1]).
-     * Given a lengthPerPermutation of 4 and a hint of [2], the expected result is:
-     *      [true, true, false, false]
-     *      [false, true, true, false]
-     *      [false, false, true, true]
-     *      
-     * For a hint of [1,1], the expected permutations are:
-     *      [true, false, true, false]
-     *      [true, false, false, true]
-     *      [false, true, false, true]
-     *      
-     * For a one-element hint, the algorithm needs to walk that one element.
-     * FalseCount = lengthPerPermutation - hint[0]
-     * This tells us how many "False" there must be around the hint in total, so we need a 
-     * left and right component.
-     * Start out with Left = 0, Right = FalseCount and then shift over to left one by one.
-     * 
-     * For multi-element hints, elements need to be separated by at least one False, but can be more.
-     * FalseCount = lengthPerPermutation - hintData.Sum()
-     * This only tells us how many Falses there need to be, but not where they are.
-     * One option is to first find all the permutations for the actual elements,
-     * so with [1,1] on a length of 4, the options are "true, false, true" and "true, false, false, true".
-     * With those permutations as the "center piece", we can do the same shift from left to right.
-     * 
-     * Of course, there are optimizations:
-     * If hintData.Sum() == 0 then there is only 1 Permutation: All Empty
-     * If hintData.Sum() == lengthPerPermutation then there is only 1 Permutation: All Filled
-     * If hintData.Sum() + hintData.Count == lengthPerPermutation then there is only 1 Permutation: Each hintData element, separated by a single False.
-     * 
-     * For everything else, we need to get all the permutations.
-     */
     internal static class PermutationGenerator
     {
         internal static void GeneratePermutationsForHintData(int[] hintData, int lengthPerPermutation, Action<BitArray> actionWithPermutation)
@@ -79,7 +46,7 @@ namespace PicSol
             else if (hintData.Length == 1)
             {
                 // Permutations for just a single element can use a simple shift from left to right
-                CreateSimplePermutations(hintData, lengthPerPermutation, actionWithPermutation);
+                CreateSimplePermutations(hintData[0], lengthPerPermutation, actionWithPermutation);
             }
             else
             {
@@ -104,17 +71,9 @@ namespace PicSol
 
             for (int hix = 0; hix < hintData.Length; hix++)
             {
-                for (int i = 0; i < hintData[hix]; i++)
-                {
-                    ba.Set(ix, true);
-                    ix++;
-                }
-
-                if (ix < ba.Count)
-                {
-                    ba.Set(ix, false);
-                    ix++;
-                }
+                var count = hintData[hix];
+                SetBits(ba, ix, count, true);
+                ix += count + 1;
             }
 
             return ba;
@@ -130,16 +89,9 @@ namespace PicSol
         /// <param name="hintData"></param>
         /// <param name="lengthPerPermutation"></param>
         /// <returns></returns>
-        internal static void CreateSimplePermutations(int[] hintData, int lengthPerPermutation, Action<BitArray> actionWithPermutation)
+        internal static void CreateSimplePermutations(int hint, int lengthPerPermutation, Action<BitArray> actionWithPermutation)
         {
-            if (hintData.Length != 1)
-            {
-                throw new InvalidOperationException($"CreateSimplePermutations was called, but hintData doesn't have exactly 1 element. hintData: [{string.Join(",", hintData)}]");
-            }
-
-            var hd = hintData[0];
-
-            var falseCount = lengthPerPermutation - hd;
+            var falseCount = lengthPerPermutation - hint;
             if (falseCount == 0)
             {
                 actionWithPermutation(new BitArray(lengthPerPermutation, true));
@@ -147,29 +99,13 @@ namespace PicSol
             else
             {
                 var left = 0;
-                var right = falseCount;
-
-                while (right >= 0)
+                while (falseCount >= 0)
                 {
-                    var ix = 0;
                     var ba = new BitArray(lengthPerPermutation, false);
-                    for (var l = 0; l < left; l++)
-                    {
-                        ba[ix++] = false;
-                    }
-
-                    for (var h = 0; h < hd; h++)
-                    {
-                        ba[ix++] = true;
-                    }
-
-                    for (var r = 0; r < right; r++)
-                    {
-                        ba[ix++] = false;
-                    }
+                    SetBits(ba, left, hint, true);
 
                     left++;
-                    right--;
+                    falseCount--;
 
                     actionWithPermutation(ba);
                 }
@@ -198,10 +134,18 @@ namespace PicSol
         /// <param name="actionWithPermutation"></param>
         internal static void CreateExpensivePermutations(int[] hintData, int lengthPerPermutation, int hintSum, Action<BitArray> actionWithPermutation)
         {
-            var falseCount = lengthPerPermutation - hintSum + 1;
+            var falseCount = lengthPerPermutation - hintSum + 1; // The + 1 is intentional, because of the way the Enumerator works.
             foreach (var bas in ExpensivePermutationEnumerator.CreateEnumerable(hintData, 0, lengthPerPermutation, falseCount))
             {
                 actionWithPermutation(bas);
+            }
+        }
+
+        internal static void SetBits(BitArray ba, int startIx, int length, bool value)
+        {
+            for (int i = startIx; i < (startIx + length); i++)
+            {
+                ba.Set(i, value);
             }
         }
     }

@@ -118,7 +118,7 @@ namespace PicSol
                     {
                         _bac = _innerEnumerator.Current;
                         _count = _bac.Index - _hintData[_currentIx];
-                        SetBits(_bac.Permutation, _count, _hintData[_currentIx], true);
+                        PermutationGenerator.SetBits(_bac.Permutation, _count, _hintData[_currentIx], true);
                         _count = _count - _x;
                         _current = new ExpensivePermutationState(_bac.Permutation, _count);
                         _state = State.Two;
@@ -198,14 +198,6 @@ namespace PicSol
                 MinusThree = -3,
                 MinusTwo = -2,
                 MinusOne = -1
-            }
-
-            private static void SetBits(BitArray ba, int startIx, int length, bool value)
-            {
-                for (int i = startIx; i < (startIx + length); i++)
-                {
-                    ba.Set(i, value);
-                }
             }
         }
     }
