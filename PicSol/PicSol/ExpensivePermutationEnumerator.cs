@@ -101,7 +101,8 @@ namespace PicSol
                                 return true;
                             }
                             _x = 1;
-                            goto label_11; // This is copy/pasted from a compiler-generated Enumerator and hasn't been refactored yet.
+                            ReinitializeInnerEnumerator();
+                            return InnerEnumeratorLoop();
                         case State.CreatedEmptyBitArray:
                             _state = State.Finished;
                             return false;
@@ -113,29 +114,7 @@ namespace PicSol
                             return false;
                     }
 
-                    label_9:
-                    if (_innerEnumerator.MoveNext())
-                    {
-                        _bac = _innerEnumerator.Current;
-                        _count = _bac.Index - _hintData[_currentIx];
-                        PermutationGenerator.SetBits(_bac.Permutation, _count, _hintData[_currentIx], true);
-                        _count = _count - _x;
-                        _current = new ExpensivePermutationState(_bac.Permutation, _count);
-                        _state = State.DoAnotherIteration;
-                        return true;
-                    }
-                    Finally();
-                    _innerEnumerator = null;
-                    _x = _x + 1;
-
-                    label_11:
-                    if (_x >= _falseCount - _hdl + 2)
-                    {
-                        return false;
-                    }
-                    _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _x).GetEnumerator();
-                    _state = State.ReinitializedInnerEnumerator;
-                    goto label_9;
+                    return InnerEnumeratorLoop();
                 }
                 catch
                 {
@@ -144,11 +123,56 @@ namespace PicSol
                 return false;
             }
 
+            private bool InnerEnumeratorLoop()
+            {
+                while (true)
+                {
+                    if (TryAdvancingInnerEnumerator())
+                    {
+                        return true;
+                    }
+                    if (!ReinitializeInnerEnumerator())
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            private bool ReinitializeInnerEnumerator()
+            {
+                if (_x >= _falseCount - _hdl + 2)
+                {
+                    return false;
+                }
+                _innerEnumerator = CreateEnumerable(_hintData, _currentIx + 1, _lengthPerPermutation, _falseCount - _x).GetEnumerator();
+                _state = State.ReinitializedInnerEnumerator;
+                return true;
+            }
+
+            private bool TryAdvancingInnerEnumerator()
+            {
+                if (_innerEnumerator.MoveNext())
+                {
+                    _bac = _innerEnumerator.Current;
+                    _count = _bac.Index - _hintData[_currentIx];
+                    PermutationGenerator.SetBits(_bac.Permutation, _count, _hintData[_currentIx], true);
+                    _count = _count - _x;
+                    _current = new ExpensivePermutationState(_bac.Permutation, _count);
+                    _state = State.DoAnotherIteration;
+                    return true;
+                }
+                Finally();
+                _innerEnumerator = null;
+                _x = _x + 1;
+                return false;
+            }
+
             IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ExpensivePermutationState>)this).GetEnumerator();
 
             IEnumerator<ExpensivePermutationState> IEnumerable<ExpensivePermutationState>.GetEnumerator()
             {
                 ExpensivePermutationEnumeratorInner result;
+                // TODO: Does the Thread ID really matter here?
                 if (_state == State.Initial && _initialThreadId == Thread.CurrentThread.ManagedThreadId)
                 {
                     _state = State.StartNewEnumeration;
