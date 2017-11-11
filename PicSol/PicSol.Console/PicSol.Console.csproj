@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>PicSol</RootNamespace>
+    <AssemblyName>PicSolApp</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\PicSol.Tests\ExampleNonograms.cs" Link="ExampleNonograms.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PicSol\PicSol.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net4</TargetFrameworks>
+    <RootNamespace>PicSol</RootNamespace>
+    <AssemblyName>PicSol</AssemblyName>
+    <Version>0.0.1-dev</Version>
+    <Product>PicSol</Product>
+    <Authors>Michael Stum &lt;opensource@stum.de&gt;</Authors>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Title>PicSol Nonogram/Picross Solver Library</Title>
+    <Description>A library to solve Nonograms, also known as Picross (Picture Crosswords)</Description>
+    <Copyright>© 2017 Michael Stum</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/mstum/PicSol/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/mstum/PicSol</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mstum/PicSol.git</RepositoryUrl>
+    <PackageIconUrl>http://mstum.github.com/PicSol/package.png</PackageIconUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags></PackageTags>
+    <PackageId>PicSol</PackageId>
+    <IncludeSource>true</IncludeSource>
+    <IncludeSymbols>true</IncludeSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>
