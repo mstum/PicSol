@@ -124,7 +124,7 @@ namespace PicSol
                 var bac = _innerEnumerator.Current;
                 var hd = _hintData[_currentIx];
                 var count = bac.Index - hd;
-                PermutationGenerator.SetBits(bac.Permutation, count, hd, true);
+                bac.Permutation.SetBits(count, hd, true);
                 count = count - _rightFreeSpace;
                 _current = new ExpensivePermutationState(bac.Permutation, count);
                 _state = State.InnerEnumeratorAdvancedSuccessfully;

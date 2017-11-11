@@ -72,7 +72,7 @@ namespace PicSol
             for (int hix = 0; hix < hintData.Length; hix++)
             {
                 var count = hintData[hix];
-                SetBits(ba, ix, count, true);
+                ba.SetBits(ix, count, true);
                 ix += count + 1;
             }
 
@@ -102,7 +102,7 @@ namespace PicSol
                 while (falseCount >= 0)
                 {
                     var ba = new BitArray(lengthPerPermutation, false);
-                    SetBits(ba, left, hint, true);
+                    ba.SetBits(left, hint, true);
 
                     left++;
                     falseCount--;
@@ -138,14 +138,6 @@ namespace PicSol
             foreach (var bas in ExpensivePermutationEnumerator.CreateEnumerable(hintData, 0, lengthPerPermutation, falseCount))
             {
                 actionWithPermutation(bas.Permutation);
-            }
-        }
-
-        internal static void SetBits(BitArray ba, int startIx, int length, bool value)
-        {
-            for (int i = startIx; i < (startIx + length); i++)
-            {
-                ba.Set(i, value);
             }
         }
     }

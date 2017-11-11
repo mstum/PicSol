@@ -188,11 +188,9 @@ namespace PicSol
                 cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
                 var state = new SolverState(nonogram, timeout, useMultipleCores, cancellationTokenSource);
 
-                Solution ReturnWithResult(SolveResult result) => new Solution(state, result);
-
                 if (!state.PopulatePermutations())
                 {
-                    return ReturnWithResult(SolveResult.Cancelled);
+                    return state.CreateSolution(SolveResult.Cancelled);
                 }
 
                 var stepResult = ProcessStepResult.KeepGoing;
@@ -204,8 +202,7 @@ namespace PicSol
                     state.StepCount++;
                     if (stepResult == ProcessStepResult.Unsolvable)
                     {
-                        state.UpdateTiles();
-                        return ReturnWithResult(SolveResult.Unsolvable);
+                        return state.CreateSolution(SolveResult.Unsolvable);
                     }
 
                     state.Stopwatch.Stop();
@@ -213,13 +210,11 @@ namespace PicSol
                     if (state.HasHitTimeout || state.CancellationToken.IsCancellationRequested)
                     {
                         state.CancelToken();
-                        state.UpdateTiles();
-                        return ReturnWithResult(SolveResult.Cancelled);
+                        return state.CreateSolution(SolveResult.Cancelled);
                     }
                 }
 
-                var success = state.UpdateTiles();
-                return ReturnWithResult(success ? SolveResult.Success : SolveResult.Unsolvable);
+                return state.CreateSolution(SolveResult.Success);
             }
             finally
             {

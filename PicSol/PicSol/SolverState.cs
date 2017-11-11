@@ -32,12 +32,10 @@ namespace PicSol
             _cancellationTokenSource = cancellationTokenSource ?? throw new ArgumentNullException(nameof(cancellationTokenSource));
             CancellationToken = _cancellationTokenSource.Token;
             Timeout = timeout;
-            UseMultipleCores = useMultipleCores;            
+            UseMultipleCores = useMultipleCores;
 
-            Elapsed = TimeSpan.Zero;
             Stopwatch = new Stopwatch();
             Tiles = new TilesCollection(nonogram.RowCount, nonogram.ColumnCount);
-            StepCount = InitialRowPermutationsCount = InitialColumnPermutationsCount = 0;
         }
 
         public bool HasHitTimeout => Timeout.HasValue && Elapsed > Timeout.Value;
@@ -45,7 +43,18 @@ namespace PicSol
         public void UpdateElapsed() => Elapsed += Stopwatch.Elapsed;
         public void CancelToken() => _cancellationTokenSource.Cancel();
 
-        public bool UpdateTiles()
+        public Solution CreateSolution(SolveResult solverResult)
+        {
+            var isSolvable = UpdateTiles();
+            if (solverResult == SolveResult.Success && !isSolvable)
+            {
+                solverResult = SolveResult.Unsolvable;
+            }
+
+            return new Solution(this, solverResult);
+        }
+
+        private bool UpdateTiles()
         {
             for (int rowIndex = 0; rowIndex < RowPermutations.Count; rowIndex++)
             {
