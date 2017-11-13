@@ -4,7 +4,7 @@ namespace PicSol.Tests
 {
     public static class ExampleNonograms
     {
-        public static IEnumerable<Nonogram> AllNonograms => new Nonogram[] { Chair, CodeDocExample, WikipediaW, PermutationTest, OneByOne, OneByTwo, OneByTwoFlipped, Impossible, ManyGaps, SlowUnsolvable };
+        public static IEnumerable<Nonogram> AllNonograms => new Nonogram[] { Chair, CodeDocExample, WikipediaW, PermutationTest, OneByOne, OneByTwo, OneByTwoFlipped, Impossible, ManyGaps, SlowSolvable, SlowUnsolvable };
 
         public static Nonogram CodeDocExample
         {
@@ -41,5 +41,9 @@ namespace PicSol.Tests
         public static Nonogram SlowUnsolvable => new Nonogram("Slow and Unsolvable", 34, 50,
             "3,2 10 11 2,3,3 2,1,2 1,1,2 1,1 1 1 1 1,9 2,13 4,16 6,19 6,21 5,23 7,25 7,26 10,11,14 7,3,12,15 6,2,28 3,28 4,12,15 21,1,1,1,1,1,1,1 20,1,1,1,1,1,1,1 21,1,1,1,1,1,1 34 6,21 2,1,7 16,9,2 2,5,3,6,14 1,4,2,1,1,4 10,17,7 4,7,3,1,7,6",
             "1,1 1,1,1 2,1,1 3,1,1 3,1,1 4,1,1 4,1,1 4,2,1 4,1,1 3,1,1 6,1,1 10,2,2 4,6,2,3 5,4,1,3 4,5,4,1 4,4,3,1 4,5,2,2 5,1,1 5,1,1 6,1,1 7,1,1 8,1,2 8,4 9,1,1 10,1,1 11,2,2 12,2,2 14,2,2 15,1,1 15,1,1 16,1,1 2,10,5,1,2 2,17,1,2 2,12,3,2,1 2,8,8,1,2 3,8,4,2,1,1 3,18,2,1 4,13,2,2,1 27,1,2 3,13,3,1,2 3,19,1,2 3,13,3,1,1 3,19,3 4,12,3,1,1 3,18,1,2 2,11,3,1,1 15,2,1 8,2,1,1 6,1,1 4,1,1");
+
+        public static Nonogram SlowSolvable => new Nonogram("Slow but Solvable", 34, 50,
+            "3,2 10 11 2,3,3 2,1,2 1,1,2 1,1 1 1 1 1,9 2,13 4,16 6,19 6,21 5,23 7,25 7,26 10,11,14 7,3,12,15 6,2,28 3,28 4,12,15 21,1,1,1,1,1,1,1 20,1,1,1,1,1,1,1 21,1,1,1,1,1,1 34 6,21 2,1,7 16,9,2 2,5,3,6,14 1,4,2,1,1,4 10,17,7 4,7,3,1,7,6",
+            "1,1 1,1,1 2,1,1 3,1,1 3,1,1 4,1,1 4,1,1 4,2,1 4,1,1 3,1,1 6,1,1 10,2,2 4,6,2,3 5,4,1,3 4,5,4,1 4,4,3,1 4,5,2,1 5,1,1 5,1,1 6,1,1 7,1,1 8,1,2 8,4 9,1,1 10,1,1 11,2,2 12,2,2 14,2,2 15,1,1 15,1,1 16,1,1 2,10,5,1,2 2,17,1,2 2,12,3,2,1 2,8,8,1,2 3,8,4,2,1,1 3,18,2,1 4,13,2,2,1 27,1,2 3,13,3,1,2 3,19,1,2 3,13,3,1,1 3,19,3 4,12,3,1,1 3,18,1,2 2,11,3,1,1 15,2,1 8,2,1,1 6,1,1 4,1,1");
     }
 }
