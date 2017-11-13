@@ -46,6 +46,7 @@ namespace PicSol.Tests
         [Fact]
         public void WikipediaW_FinishesFastEnough()
         {
+            // Note that Debug Builds are about half fast as Release builds
             var targetTime = TimeSpan.FromMilliseconds(250);
 
             var solution = Solver.Solve(ExampleNonograms.WikipediaW, targetTime);
@@ -55,6 +56,7 @@ namespace PicSol.Tests
         [Fact]
         public void ManyGaps_FinishesFastEnough()
         {
+            // Note that Debug Builds are about half fast as Release builds
             var targetTime = TimeSpan.FromMilliseconds(250);
 
             var solution = Solver.Solve(ExampleNonograms.ManyGaps, targetTime);
